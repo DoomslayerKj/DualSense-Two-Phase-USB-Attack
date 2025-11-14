@@ -40,6 +40,9 @@ You are now ready to run the attack.
 
 How to Run
 
+Connect your DS5 controller to your linux machine and verify using lsusb, and you should see something like this:
+"Bus 002 Device 011: ID 054c:0ce6 Sony Corp. DualSense wireless controller (PS5)"
+
 The main script (attack_ds5.sh) takes two arguments: MESSAGE (in quotes) and DOS_FLAG (0 or 1).
 
 Example 1: Taunt Only (No DOS)
