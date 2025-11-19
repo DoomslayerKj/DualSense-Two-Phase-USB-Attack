@@ -19,6 +19,16 @@ The lab is split into two distinct phases, comparing the "polite" and "hostile" 
 | **Phase 1: Hijack (Control)** | taunt.py | dualsense-controller | **HID Interface** | **High-Level Control** (Sending proprietary *Output Reports* to control lights/rumble, with OS permission). |
 | **Phase 2: DOS** | fuzz\_ds5.py | pyusb | **Control Endpoint (EP0)** | **Firmware Task Starvation** (Bypassing the kernel to send abusive SET\_CONFIGURATION packets). |
 
+### **📊 Attack Methodology**
+
+1.Run the latency analyzer script - latencyanalyzer.py
+
+Note: The analyzer prints the highest measured latency overall when CTRL+C interrupt is recieved 
+
+2.Run the Attack orchestrator script - attack-ds5.py
+
+You can measure the latency of the controller's responses this way, run it with and without DOS-ing it and see the impact yourself!!
+
 ### **📊 Attack Orchestrator Execution**
 
 The main script (attack\_ds5.sh) takes two required arguments: the MESSAGE (in quotes) and the DOS\_FLAG (0, 1, or 2).
@@ -42,7 +52,7 @@ Invalid Examples:
 
                  ./attack-ds5.py " " 
 
-### **⏰ Latency Measurer Execution**
+### **⏰ Latency Analyzer Execution**
    
              python3.13 latencyanalyzer.py
 
