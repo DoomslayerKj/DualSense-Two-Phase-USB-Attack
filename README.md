@@ -16,6 +16,8 @@
 
 "Bus 002 Device 008: ID 054c:0ce6 Sony Corp. DualSense wireless controller (PS5)"
 
+2.Install all the required dependencies using the setup.sh script, MAKE SURE TO RUN IT WITH SUDO PRIVILEGES!!
+
 ### **🧠 Project Architecture & Technical Goals**
 
 The lab is split into two distinct phases, comparing the "polite" and "hostile" methods of USB communication:
