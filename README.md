@@ -19,29 +19,32 @@ The lab is split into two distinct phases, comparing the "polite" and "hostile" 
 | **Phase 1: Hijack (Control)** | taunt.py | dualsense-controller | **HID Interface** | **High-Level Control** (Sending proprietary *Output Reports* to control lights/rumble, with OS permission). |
 | **Phase 2: DOS** | fuzz\_ds5.py | pyusb | **Control Endpoint (EP0)** | **Firmware Task Starvation** (Bypassing the kernel to send abusive SET\_CONFIGURATION packets). |
 
-### **📊 Experiment Execution**
+### **📊 Attack Orchestrator Execution**
 
 The main script (attack\_ds5.sh) takes two required arguments: the MESSAGE (in quotes) and the DOS\_FLAG (0, 1, or 2).
 
 0 = NO DOS, 1 = Mild DOS, 2 = MAX DOS
 
 Valid Examples: 
-                sudo ./attack-ds5.py " " 0
+                 ./attack-ds5.py " " 0
 
-                sudo ./attack-ds5.py "MESSAGE" 2
+                 ./attack-ds5.py "MESSAGE" 2
 
-                sudo ./attack-ds5.py "ANYTHING" 1
+                 ./attack-ds5.py "ANYTHING" 1
 
 
 
 Invalid Examples:
                 
-                sudo ./attack-ds5.py "" 0
+                 ./attack-ds5.py "" 0
 
-                sudo ./attack-ds5.py  2
+                 ./attack-ds5.py  2
 
-                sudo ./attack-ds5.py " " 
+                 ./attack-ds5.py " " 
 
+### **⏰ Latency Measurer Execution**
+   
+             python3.13 latencyanalyzer.py
 
 
 #### **I. Performance Degradation Test (Mild DOS: FLAG 1\)**
