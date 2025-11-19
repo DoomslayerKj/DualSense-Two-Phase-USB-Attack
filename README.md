@@ -1,76 +1,78 @@
-# **🎮 DualSense Two-Phase USB Attack (Advanced DOS Lab)**
+DualSense Two-Phase USB Attack (Lab Project)
 
-**Thesis:** This project demonstrates that consumer-grade embedded controllers are vulnerable to **Firmware Task Starvation** and proves the necessity of kernel-level driver detachment to execute hostile, low-level USB attacks.
+This project demonstrates two different methods of interacting with a Sony DualSense 5 controller at a hardware level: a high-level "Hijack" and a low-level "Denial of Service" (DOS).
 
-### **⚠️ WARNING: Hostile Code and Usage**
+WARNING: This is for educational purposes and for use on your own hardware only. The DOS scripts (fuzz_ds5.py and fuzz_ds5_mild.py) are real Denial of Service attacks that freeze your controller and require sudo (root) privileges to run. Use at your own risk.
 
-**THIS IS A DENIAL OF SERVICE (DOS) ATTACK.** This repository contains code that performs **real-time resource exhaustion** on embedded hardware.
+Project Files
 
-* **USE ONLY ON YOUR OWN DEVICES.**  
-* The DOS scripts (fuzz\_ds5.py and fuzz\_ds5\_mild.py) require **root privileges (sudo)** because they forcibly detach the kernel driver (dev.detach\_kernel\_driver(0)).  
-* The system setup requires using \--break-system-packages (automated by setup.sh), suitable only for dedicated lab VMs.
+setup.sh: The main setup script to install all dependencies.
 
-### **🧠 Project Architecture & Technical Goals**
+attack_ds5.sh: The main orchestration script (use this to run the attack).
 
-The lab is split into two distinct phases, comparing the "polite" and "hostile" methods of USB communication:
+taunt.py: (Phase 1) The Python script for the high-level "Hijack" to send Morse code.
 
-| Phase | Script | Library | Target | Goal Demonstrated |
-| :---- | :---- | :---- | :---- | :---- |
-| **Phase 1: Hijack (Control)** | taunt.py | dualsense-controller | **HID Interface** | **High-Level Control** (Sending proprietary *Output Reports* to control lights/rumble, with OS permission). |
-| **Phase 2: DOS** | fuzz\_ds5.py | pyusb | **Control Endpoint (EP0)** | **Firmware Task Starvation** (Bypassing the kernel to send abusive SET\_CONFIGURATION packets). |
+fuzz_ds5.py: (Phase 2, Mode 2) The Python script for the Extreme DOS flood.
 
-### **📊 Experiment Execution**
+fuzz_ds5_mild.py: (Phase 2, Mode 1) The Python script for the Mild (Intermittent) DOS burst cycle.
 
-The main script (attack\_ds5.sh) takes two required arguments: the MESSAGE (in quotes) and the DOS\_FLAG (0, 1, or 2).
+latency_analyzer.py: The external measurement tool (run separately).
 
-0 = NO DOS, 1 = Mild DOS, 2 = MAX DOS
+requirements.txt: The list of all Python dependencies.
 
-Valid Examples: 
-                sudo ./attack-ds5.py " " 0
+README.md: This file.
 
-                sudo ./attack-ds5.py "MESSAGE" 2
+Setup (Linux Only)
 
-                sudo ./attack-ds5.py "ANYTHING" 1
+Make setup.sh Executable:
+
+chmod +x setup.sh
 
 
+Run the Setup Script:
 
-Invalid Examples:
-                
-                sudo ./attack-ds5.py "" 0
-
-                sudo ./attack-ds5.py  2
-
-                sudo ./attack-ds5.py " " 
+sudo ./setup.sh
 
 
+Connect Controller:
+After the setup script finishes, unplug your controller's USB cable and plug it back in.
 
-#### **I. Performance Degradation Test (Mild DOS: FLAG 1\)**
+How to Run the Experiments
 
-This mode demonstrates **Intermittent Denial of Service** by cycling between a **Burst Phase** (Hostile Detachment) and a **Recovery Phase** (Driver Re-attachment). This test must be run alongside the latency\_analyzer.py tool.
+The main script (attack_ds5.sh) takes two arguments: MESSAGE (in quotes) and DOS_FLAG (0, 1, or 2).
 
-| Window | Command | Purpose | Impact |
-| :---- | :---- | :---- | :---- |
-| **Terminal 1 (Analyzer)** | python3.13 latency\_analyzer.py | **Measurement:** Reports input speed (baseline is **\~4-8ms**). | **Spikes to \>3000ms** |
-| **Terminal 2 (Attacker)** | sudo ./attack\_ds5.sh "LAG" 1 | **Attack:** Launches the Mild DOS burst cycle. | **Input stream is visibly broken/frozen.** |
+1. Baseline Test (Taunt Only)
 
-#### **II. Complete Failure Test (Extreme DOS: FLAG 2\)**
+Command: ./attack_ds5.sh "SOS" 0
 
-* **Command:** sudo ./attack\_ds5.sh "FREEZE" 2  
-* **Result:** Controller blinks "FREEZE," then instantly stops communicating due to terminal task starvation. The device requires a full **USB Reset** (dev.reset()) to restore normal operation.
+Result: Controller blinks "SOS" and returns to normal (blue light).
 
-### **⚙️ Setup & File Reference**
+2. Performance Degradation Test (Mild DOS)
 
-| File | Description |
-| :---- | :---- |
-| setup.sh | **Automated Installer:** Installs all system and Python dependencies (python3.13, libhidapi-dev, udev-rules). |
-| attack\_ds5.sh | **Orchestrator:** The main script to launch the taunt and select the DOS mode. |
-| latency\_analyzer.py | External tool for *quantifying* the attack's impact on input performance. |
+This requires two separate terminal windows to run simultaneously, allowing you to quantify the attack.
 
-#### **Setup Steps (Linux/Kali VM)**
+Window
 
-1. chmod \+x setup.sh  
-2. sudo ./setup.sh
+Command
 
-### **📝 Final Abstract**
+Purpose
 
-This project successfully weaponizes the mandatory USB protocol command, SET\_CONFIGURATION, proving that high-speed, legitimate signals can exhaust the low-power ARM microcontroller in the DualSense 5\. This method achieves a robust Denial of Service that bypasses standard operating system security controls.
+Terminal 1 (Analyzer)
+
+python3.13 latency_analyzer.py
+
+Measures the input speed (baseline is ~4-8ms).
+
+Terminal 2 (Attacker)
+
+sudo ./attack_ds5.sh "LAG" 1
+
+Launches the Mild DOS cycle (3s freeze / 3s recover).
+
+Observation: During the attack, the Interval reported in Terminal 1 will spike dramatically (e.g., from 4ms to >3000ms or freeze entirely) when the burst hits, and then drop back down, proving intermittent service denial. Use the PEAK LATENCY value for your report.
+
+3. Complete Failure Test (Extreme DOS)
+
+Command: sudo ./attack_ds5.sh "FAILURE" 2
+
+Result: Controller blinks "FAILURE," freezes permanently, and requires a software reset to recover.

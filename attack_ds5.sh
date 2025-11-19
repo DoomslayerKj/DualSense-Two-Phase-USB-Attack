@@ -11,7 +11,7 @@ MESSAGE="$1"
 DOS_FLAG="$2"
 
 # --- Input Validation ---
-# Check 1: Check if all three arguments are present
+# Check 1: Check if arguments are missing (MUST BE FIRST)
 if [ -z "$MESSAGE" ] || [ -z "$DOS_FLAG" ]; then
     echo "Error: Missing arguments."
     echo "Usage: ./attack_ds5.sh <message> <dos_flag>"
