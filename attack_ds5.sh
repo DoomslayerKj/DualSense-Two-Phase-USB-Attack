@@ -1,70 +1,74 @@
 #!/bin/bash
 
-# This script launches the two-phase controller attack.
+# This script orchestrates the two-phase controller attack.
+# Phase 1: "Taunt" (Morse Code Hijack) - Always runs.
+# Phase 2: "DOS" (Physical Attack) - Controlled by $2.
+
 # $1: The message to send (e.g., "DOSSED")
-# $2: DOS flag (1 = run DOS, 0 = skip DOS)
+# $2: DOS flag (0 = Skip DOS, 1 = Mild DOS, 2 = Extreme DOS)
 
 MESSAGE="$1"
 DOS_FLAG="$2"
 
 # --- Input Validation ---
-# Check 1: Check if arguments are empty
+# Check 1: Check if all three arguments are present
 if [ -z "$MESSAGE" ] || [ -z "$DOS_FLAG" ]; then
     echo "Error: Missing arguments."
     echo "Usage: ./attack_ds5.sh <message> <dos_flag>"
-    echo "Example: ./attack_ds5.sh \"DOSSED\" 1"
+    echo "Example: ./attack_ds5.sh \"DOSSED\" 2"
     echo "Example: ./attack_ds5.sh \"SOS\" 0"
     exit 1
 fi
 
 # Check 2: Validate message (only letters and spaces allowed)
-# This 'grep' command is the most robust way to check.
-# It checks if the message contains any character NOT (^) in the set A-Z, a-z, or space.
-# 'echo -n' prints the message without a newline.
-# 'grep -q' runs in quiet mode.
 if echo -n "$MESSAGE" | grep -q "[^A-Za-z ]"; then
     echo "Error: Invalid message."
     echo "Argument 1 must contain only letters (A-Z, a-z) and spaces."
-    echo "Example: \"DOSSED\" or \"SOS\""
     exit 1
 fi
 
-# Check 3: Validate DOS flag (only 0 or 1 allowed)
-if ! [[ "$DOS_FLAG" == "0" || "$DOS_FLAG" == "1" ]]; then
+# Check 3: Validate DOS flag (only 0, 1, or 2 allowed)
+if ! [[ "$DOS_FLAG" == "0" || "$DOS_FLAG" == "1" || "$DOS_FLAG" == "2" ]]; then
     echo "Error: Invalid DOS flag."
-    echo "Argument 2 must be exactly '0' (to skip DOS) or '1' (to run DOS)."
+    echo "Argument 2 must be '0' (None), '1' (Mild), or '2' (Extreme)."
     exit 1
 fi
 # ------------------------------
 
-echo "--- [PHASE 1: TAUNT] ---"
+echo "--- [PHASE 1: TAUNT (Hijack)] ---"
 echo "Sending message in Morse code: $MESSAGE"
-echo "------------------------------"
+echo "-----------------------------------"
 
 # Run the "polite" taunt script as the normal user
-# This relies on the udev-rules we set up.
 python3.13 taunt.py "$MESSAGE"
 
 # Check if the taunt script finished successfully
-if [ $? -eq 0 ]; then
-    echo ""
-    # --- Check the DOS Flag ---
-    if [ "$DOS_FLAG" -eq 1 ]; then
-        echo "--- [PHASE 2: DOS] ---"
-        echo "Taunt complete. Launching DOS."
-        echo "Controller will become unresponsive."
-        echo "------------------------------"
-        
-        # Run the "hostile" DOS script as root (sudo)
-        # This is required for pyusb to detach the kernel driver.
-        sudo python3.13 fuzz_ds5.py
-    else
-        echo "--- [PHASE 2: SKIPPED] ---"
-        echo "DOS_FLAG set to 0. Skipping DOS attack."
-    fi
-else
+if [ $? -ne 0 ]; then
     echo "Phase 1 (Taunt) failed. Aborting attack."
     exit 1
 fi
 
-echo "Attack complete."
+echo ""
+echo "--- [PHASE 2: DOS ATTACK] ---"
+echo "-------------------------------"
+
+case "$DOS_FLAG" in
+    0)
+        echo "DOS_FLAG set to 0. Skipping attack phase."
+        ;;
+    1)
+        echo "MODE: MILD DOS (Intermittent Freeze/Recovery)"
+        echo "To measure latency, run 'python3.13 latency_analyzer.py' in a separate terminal."
+        echo "Launching fuzz_ds5_mild.py (requires sudo)..."
+        # Mild DOS requires sudo for driver detach/reset
+        sudo python3.13 fuzz_ds5_mild.py
+        ;;
+    2)
+        echo "MODE: EXTREME DOS (Permanent Freeze)"
+        echo "Launching fuzz_ds5.py (requires sudo)..."
+        # Extreme DOS requires sudo for driver detach/reset
+        sudo python3.13 fuzz_ds5.py
+        ;;
+esac
+
+echo "Attack sequence complete."
