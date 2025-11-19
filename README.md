@@ -8,7 +8,7 @@
 
 * **USE ONLY ON YOUR OWN DEVICES.**  
 * The DOS scripts (fuzz\_ds5.py and fuzz\_ds5\_mild.py) require **root privileges (sudo)** because they forcibly detach the kernel driver (dev.detach\_kernel\_driver(0)).  
-* The system setup requires using \--break-system-packages (automated by setup.sh), suitable only for dedicated lab VMs (like Kali).
+* The system setup requires using \--break-system-packages (automated by setup.sh), suitable only for dedicated lab VMs.
 
 ### **🧠 Project Architecture & Technical Goals**
 
@@ -48,8 +48,7 @@ This mode demonstrates **Intermittent Denial of Service** by cycling between a *
 #### **Setup Steps (Linux/Kali VM)**
 
 1. chmod \+x setup.sh  
-2. sudo ./setup.sh  
-3. **Unplug and replug** the controller after setup.
+2. sudo ./setup.sh
 
 ### **📝 Final Abstract**
 
