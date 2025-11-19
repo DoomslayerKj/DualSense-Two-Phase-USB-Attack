@@ -26,14 +26,20 @@ The main script (attack\_ds5.sh) takes two required arguments: the MESSAGE (in q
 0 = NO DOS, 1 = Mild DOS, 2 = MAX DOS
 
 Valid Examples: sudo ./attack-ds5.py " " 0
+
                 sudo ./attack-ds5.py "MESSAGE" 2
+
                 sudo ./attack-ds5.py "ANYTHING" 1
 
-                
+
+
 Invalid Examples:
                 sudo ./attack-ds5.py "" 0
+
                 sudo ./attack-ds5.py  2
+
                 sudo ./attack-ds5.py " " 
+                
 
 
 #### **I. Performance Degradation Test (Mild DOS: FLAG 1\)**
