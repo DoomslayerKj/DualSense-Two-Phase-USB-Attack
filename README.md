@@ -10,6 +10,12 @@
 * The DOS scripts (fuzz\_ds5.py and fuzz\_ds5\_mild.py) require **root privileges (sudo)** because they forcibly detach the kernel driver (dev.detach\_kernel\_driver(0)).  
 * The system setup requires using \--break-system-packages (automated by setup.sh), suitable only for dedicated lab VMs.
 
+### **⚠️ Requirements**
+
+1.Connect your Dualsense 5 controller to your linux machine and verify using "lsusb" command, you should see something like this:
+
+"Bus 002 Device 008: ID 054c:0ce6 Sony Corp. DualSense wireless controller (PS5)"
+
 ### **🧠 Project Architecture & Technical Goals**
 
 The lab is split into two distinct phases, comparing the "polite" and "hostile" methods of USB communication:
