@@ -1,55 +1,106 @@
-DualSense Two-Phase USB Attack (Lab Project)
+🎮 DualSense Two-Phase USB Attack (Advanced DOS Lab)
 
-This project demonstrates two different methods of interacting with a Sony DualSense 5 controller at a hardware level: a high-level "Hijack" and a low-level "Denial of Service" (DOS).
+This project demonstrates a rigorous comparative analysis of attack vectors against the Sony DualSense 5 controller's firmware. It exploits the difference between high-level application control and low-level hardware communication.
 
-WARNING: This is for educational purposes and for use on your own hardware only. The DOS scripts (fuzz_ds5.py and fuzz_ds5_mild.py) are real Denial of Service attacks that freeze your controller and require sudo (root) privileges to run. Use at your own risk.
+⚠️ WARNING: Hostile Code and Usage
 
-Project Files
+THIS IS A DENIAL OF SERVICE (DOS) ATTACK. This repository contains code that performs real-time resource exhaustion on embedded hardware.
 
-setup.sh: The main setup script to install all dependencies.
+USE ONLY ON YOUR OWN DEVICES.
 
-attack_ds5.sh: The main orchestration script (use this to run the attack).
+The DOS scripts (fuzz_ds5.py and fuzz_ds5_mild.py) require root privileges (sudo) because they forcibly detach the kernel driver.
 
-taunt.py: (Phase 1) The Python script for the high-level "Hijack" to send Morse code.
+The system setup requires using --break-system-packages (automated by setup.sh), which is suitable only for dedicated lab VMs (like Kali).
 
-fuzz_ds5.py: (Phase 2, Mode 2) The Python script for the Extreme DOS flood.
+⚙️ Project Architecture & Technical Goals
 
-fuzz_ds5_mild.py: (Phase 2, Mode 1) The Python script for the Mild (Intermittent) DOS burst cycle.
+The lab is split into two distinct phases, leveraging different Python libraries and OS permissions to prove a security concept:
 
-latency_analyzer.py: The external measurement tool (run separately).
+Phase
 
-requirements.txt: The list of all Python dependencies.
+Script
 
-README.md: This file.
+Library
 
-Setup (Linux Only)
+Target
+
+Goal Demonstrated
+
+Phase 1: Hijack
+
+taunt.py
+
+dualsense-controller
+
+HID Interface
+
+High-Level Control (Sending proprietary Output Reports to control lights/rumble, with OS permission).
+
+Phase 2: DOS
+
+fuzz_ds5.py
+
+pyusb
+
+Control Endpoint (EP0)
+
+Firmware Task Starvation (Bypassing the kernel to send abusive SET_CONFIGURATION packets).
+
+💾 Project Files
+
+File
+
+Description
+
+setup.sh
+
+Automated Installer: Installs all system and Python dependencies (python3.13, libhidapi-dev, udev-rules).
+
+attack_ds5.sh
+
+Orchestrator: The main script to launch the taunt and select the DOS mode.
+
+taunt.py
+
+Phase 1: Blinks Morse code in "Hacker Green" (0, 255, 0) with haptic taps.
+
+fuzz_ds5.py
+
+Phase 2 (Mode 2 - Extreme): The permanent firmware DOS flood.
+
+fuzz_ds5_mild.py
+
+Phase 2 (Mode 1 - Mild): The intermittent DOS burst cycle for latency measurement.
+
+latency_analyzer.py
+
+External tool for quantifying the attack's impact on input performance.
+
+requirements.txt
+
+Python package list (dualsense-controller, pyusb).
+
+🚀 Setup (Linux/Kali VM)
 
 Make setup.sh Executable:
 
 chmod +x setup.sh
 
 
-Run the Setup Script:
+Run the Setup Script (Requires SUDO):
 
 sudo ./setup.sh
 
 
-Connect Controller:
-After the setup script finishes, unplug your controller's USB cable and plug it back in.
+Controller Connection: After the setup script completes, unplug your controller and plug it back in to ensure the new udev hardware rules are applied.
 
-How to Run the Experiments
+🔬 Experiment Execution
 
-The main script (attack_ds5.sh) takes two arguments: MESSAGE (in quotes) and DOS_FLAG (0, 1, or 2).
+The main script (attack_ds5.sh) takes two required arguments: the MESSAGE (in quotes) and the DOS_FLAG (0, 1, or 2).
 
-1. Baseline Test (Taunt Only)
+I. Performance Degradation Test (Mild DOS: FLAG 1)
 
-Command: ./attack_ds5.sh "SOS" 0
-
-Result: Controller blinks "SOS" and returns to normal (blue light).
-
-2. Performance Degradation Test (Mild DOS)
-
-This requires two separate terminal windows to run simultaneously, allowing you to quantify the attack.
+This mode demonstrates Intermittent Denial of Service and requires running two terminals simultaneously to quantify the attack's impact.
 
 Window
 
@@ -57,22 +108,32 @@ Command
 
 Purpose
 
+Expected Latency
+
 Terminal 1 (Analyzer)
 
 python3.13 latency_analyzer.py
 
-Measures the input speed (baseline is ~4-8ms).
+Measurement: Reports input speed (baseline is ~4-8ms).
+
+Spikes to >3000ms
 
 Terminal 2 (Attacker)
 
 sudo ./attack_ds5.sh "LAG" 1
 
-Launches the Mild DOS cycle (3s freeze / 3s recover).
+Attack: Launches the Mild DOS burst cycle.
 
-Observation: During the attack, the Interval reported in Terminal 1 will spike dramatically (e.g., from 4ms to >3000ms or freeze entirely) when the burst hits, and then drop back down, proving intermittent service denial. Use the PEAK LATENCY value for your report.
 
-3. Complete Failure Test (Extreme DOS)
 
-Command: sudo ./attack_ds5.sh "FAILURE" 2
+II. Complete Failure Test (Extreme DOS: FLAG 2)
 
-Result: Controller blinks "FAILURE," freezes permanently, and requires a software reset to recover.
+Command: sudo ./attack_ds5.sh "FREEZE" 2
+
+Result: Controller blinks "FREEZE," then instantly stops communicating, requiring a software/physical reset.
+
+III. Baseline Test (Taunt Only: FLAG 0)
+
+Command: ./attack_ds5.sh "SOS" 0
+
+Result: Controller blinks "SOS" and returns to normal (proves the Hijack works without DOS).
