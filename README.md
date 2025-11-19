@@ -1,7 +1,7 @@
 # **🎮 DualSense Two-Phase USB Attack (Advanced DOS Lab)**
 
 **Thesis:** This project demonstrates that consumer-grade embedded controllers are vulnerable to **Firmware Task Starvation** and proves the necessity of kernel-level driver detachment to execute hostile, low-level USB attacks.
-
+YT Demo: https://youtu.be/ijP8pOMlMVo
 ### **⚠️ WARNING: Hostile Code and Usage**
 
 **THIS IS A DENIAL OF SERVICE (DOS) ATTACK.** This repository contains code that performs **real-time resource exhaustion** on embedded hardware.
