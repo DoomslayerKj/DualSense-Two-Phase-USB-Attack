@@ -21,7 +21,7 @@ The lab is split into two distinct phases, comparing the "polite" and "hostile" 
 
 ### **📊 Attack Methodology**
 
-1.Run the latency analyzer script - latencyanalyzer.py
+1.Run the latency analyzer script - latencyanalyzer.py in a seperate terminal
 
 Note: The analyzer prints the highest measured latency overall when CTRL+C interrupt is recieved 
 
